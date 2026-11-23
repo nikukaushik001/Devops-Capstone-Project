@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: fintech-core-canary-rollout
+  labels:
+    app: fintech-core
+spec:
+  replicas: 8
+  strategy:
+    canary:
+      analysis:
+        templates:
+          - templateName: financial-sla-prometheus-metrics
+        args:
+          - name: service-name
+            value: fintech-core-service
+      steps:
+        - setWeight: 10
+        - pause: { duration: 5m }
+        - setWeight: 25
+        - pause: { duration: 10m }
+        - setWeight: 50
+        - pause: { duration: 15m }
+  selector:
+    matchLabels:
+      app: fintech-core
+  template:
+    metadata:
+      labels:
+        app: fintech-core
+    spec:
+      containers:
+        - name: payment-engine
+          image: fintech-core:v3.0.0
+          ports:
+            - containerPort: 8000
+

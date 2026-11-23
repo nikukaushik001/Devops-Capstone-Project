@@ -1,0 +1,88 @@
+name: Enterprise End-to-End DevOps Automation Platform
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/fintech-core
+
+jobs:
+  code-quality-and-sast:
+    name: Code Quality & SAST Security Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Linting (Flake8)
+        run: |
+          pip install flake8
+          flake8 src/backend/ --max-line-length=120
+      - name: Static Security Scan (Bandit SAST)
+        run: |
+          pip install bandit
+          bandit -r src/backend/ -ll -ii
+
+  unit-and-integration-tests:
+    name: Automated Unit & Integration Testing
+    needs: code-quality-and-sast
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Test Dependencies
+        run: |
+          pip install -r src/backend/requirements.txt
+      - name: Run PyTest with Coverage Gate (>=85%)
+        run: |
+          cd src/backend
+          pytest --cov=main --cov-report=xml --cov-fail-under=85 test_main.py
+
+  container-security-gate:
+    name: Build & Container Vulnerability Scanning
+    needs: unit-and-integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Build Hardened Container
+        run: |
+          docker build -t fintech-core:${{ github.sha }} src/backend/
+      - name: Aqua Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'fintech-core:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  gitops-reconciliation-trigger:
+    name: GitOps Declarative Deployment Gate
+    needs: container-security-gate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout Manifests
+        uses: actions/checkout@v4
+      - name: Update Kustomize Image Tag
+        run: |
+          cd k8s/overlays/prod
+          kustomize edit set image fintech-core-image=fintech-core:${{ github.sha }}
+      - name: Commit and Push Manifest Changes to GitOps Repo
+        run: |
+          git config user.name "GitOps Bot"
+          git config user.email "gitops-bot@enterprise.internal"
+          git commit -am "chore(gitops): promote image fintech-core:${{ github.sha }}" || echo "No changes"
+

@@ -1,0 +1,10 @@
+fastapi==0.115.5
+pydantic==2.10.2
+uvicorn==0.32.1
+prometheus-client==0.21.1
+pytest==8.3.4
+pytest-cov==6.0.0
+httpx==0.28.1
+flake8==7.1.1
+bandit==1.8.0
+

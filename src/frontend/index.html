@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise FinTech Operations Console</title>
+    <style>
+        :root { --primary: #1A365D; --accent: #2B6CB0; --bg: #F7FAFC; --card: #FFFFFF; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #2D3748; }
+        .header { background: var(--primary); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; background: #C6F6D5; color: #22543D; }
+        .metric-val { font-size: 28px; font-weight: bold; color: var(--accent); margin: 10px 0; }
+        pre { background: #EDF2F7; padding: 12px; border-radius: 6px; font-size: 13px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Enterprise FinTech Global Settlement Platform</h1>
+        <p>Real-time telemetry, declarative GitOps deployment, and zero-trust orchestration console.</p>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <h3>Engine Status</h3>
+            <span class="badge">HEALTHY & OPERATIONAL</span>
+            <div class="metric-val">v3.0.0 (Release-Canary)</div>
+            <p>Cluster: <code>k8s-prod-us-east-1</code></p>
+        </div>
+        <div class="card">
+            <h3>Settlement Throughput</h3>
+            <div class="metric-val">4,820 tx/sec</div>
+            <p>p99 Ingress Latency: <strong>14.2 ms</strong></p>
+        </div>
+        <div class="card">
+            <h3>Observability & Security</h3>
+            <p>• Prometheus Scrape: <span class="badge">ACTIVE (15s)</span></p>
+            <p>• HashiCorp Vault: <span class="badge">SEALED / ENCRYPTED</span></p>
+            <p>• GitOps Reconciler: <span class="badge">SYNCED</span></p>
+        </div>
+    </div>
+</body>
+</html>
+
